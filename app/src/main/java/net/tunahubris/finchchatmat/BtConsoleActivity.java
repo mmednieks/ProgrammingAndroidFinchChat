@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class BtConsoleActivity extends AppCompatActivity {
     private ListView mConversationView;
     private EditText mOutEditText;
     private Button mSendButton;
+    private Toolbar mToolbar;
 
     // Name of the connected device
     private String mConnectedDeviceName = null;
@@ -54,8 +56,8 @@ public class BtConsoleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bt_console);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         // Get the Bluetooth adapter, only one for now
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -233,13 +235,9 @@ public class BtConsoleActivity extends AppCompatActivity {
                 case DEVICE:
                     // save the connected device's name
                     mConnectedDeviceName = (String) msg.obj;
-                    Toast.makeText(getApplicationContext(),
-                            "Connected to " + mConnectedDeviceName,
-                            Toast.LENGTH_SHORT).show();
                     break;
                 case NOTIFY:
-                    Toast.makeText(getApplicationContext(), (String) msg.obj,
-                            Toast.LENGTH_SHORT).show();
+                    Snackbar.make(findViewById(R.id.content_bt_console), (String) msg.obj, Snackbar.LENGTH_LONG).show();
                     break;
             }
         }
@@ -252,15 +250,20 @@ public class BtConsoleActivity extends AppCompatActivity {
         private void stateChanged(BtSPPHelper.State state) {
             switch (state) {
                 case CONNECTED:
-//                    mTitle.setText(R.string.title_connected_to);
-//                    mTitle.append(mConnectedDeviceName);
+                    mSendButton.setEnabled(true);
+                    mToolbar.setTitle(R.string.title_connected_to);
+                    mToolbar.setSubtitle(mConnectedDeviceName);
                     mConversationArrayAdapter.clear();
                     break;
                 case CONNECTING:
-//                    mTitle.setText(R.string.title_connecting);
+                    mToolbar.setTitle(R.string.app_name);
+                    mToolbar.setSubtitle(R.string.title_connecting);
                     break;
                 case LISTEN:
                 case NONE:
+                    mToolbar.setTitle(R.string.app_name);
+                    mToolbar.setSubtitle("");
+                    mSendButton.setEnabled(false);
 //                    mTitle.setText(R.string.title_not_connected);
                     break;
             }
